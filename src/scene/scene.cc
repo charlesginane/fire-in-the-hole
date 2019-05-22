@@ -1,5 +1,14 @@
 #include "scene.hh"
 
+GLuint vao_cpy = 0;
+
+std::vector<GLfloat> vertices_cpy = {
+ 0.0f,  0.5f, // Vertex 1 (X, Y)
+ 0.5f, -0.5f, // Vertex 2 (X, Y)
+-0.5f, -0.5f  // Vertex 3 (X, Y)
+};
+
+
 Scene::Scene(int width, int height) : width_(width), height_(height)
 {}
 
@@ -11,9 +20,9 @@ void check_error() {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 0, 0, 1.0);
-    glDrawArrays(GL_TRIANGLES, 0, 3); 
-    //glBindVertexArray(teapot_vao_id);check_error();
-    //glDrawArrays(GL_TRIANGLES, 0, vertex_buffer_data.size());check_error();
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(vao_cpy);check_error();
+    glDrawArrays(GL_TRIANGLES, 0, vertices_cpy.size());check_error();
     glBindVertexArray(0);check_error();
     glutSwapBuffers();
 }
@@ -35,17 +44,18 @@ Scene::init(int argc, char *argv[]) {
     glEnable(GL_DEPTH_TEST);check_error();
     glutDisplayFunc(display);
 
-
-    glEnable(GL_DEPTH_TEST);check_error();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);check_error();
-    glEnable(GL_CULL_FACE);check_error();
-    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-    glPixelStorei(GL_PACK_ALIGNMENT,1);
-
     if (init_glew() == false) {
         std::cerr << "ERROR: failed to initialize glew" << std::endl;
         return false;
     }
+
+    glEnable(GL_DEPTH_TEST);check_error();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);check_error();
+    glEnable(GL_CULL_FACE);check_error();
+    glClearColor(0.4,0.4,0.4,1.0);check_error();
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    glPixelStorei(GL_PACK_ALIGNMENT,1);
+
     return true;
 }
 
@@ -59,22 +69,26 @@ std::string load_file(std::string path_file) {
     }
     std::string line;
     while(getline(file, line)) {
-      buffer += buffer + line + '\n';
+      buffer += line + '\n';
     }
     buffer += '\0';
+    file.close();
     return buffer;
 }
 
 bool
 Scene::shader(std::string vertex_shader_src, std::string fragment_shader_src) {
-    std::vector<GLuint> shader_list(2);
-    //glCreateShader(GL_VERTEX_SHADER);
+    std::vector<GLuint> shader_list;
     shader_list.push_back(glCreateShader(GL_VERTEX_SHADER)); check_error();
-    // std::cout << "test" << std::endl;
     shader_list.push_back(glCreateShader(GL_FRAGMENT_SHADER)); check_error();
-    glShaderSource(shader_list[0], 1, (const GLchar**)(load_file(vertex_shader_src).c_str()), 0);check_error();
-    std::cout << "test" << std::endl;
-    glShaderSource(shader_list[1], 1, (const GLchar**)(load_file(fragment_shader_src).c_str()), 0);check_error();
+
+    std::string content = load_file(vertex_shader_src);
+    auto content_char = content.c_str();
+    glShaderSource(shader_list[0], 1, &content_char, 0); check_error();
+
+    content = load_file(fragment_shader_src);
+    content_char = content.c_str();
+    glShaderSource(shader_list[1], 1, &content_char, 0);check_error();
 
     for (auto shader : shader_list) {
         GLint compile_status = GL_TRUE;
@@ -100,11 +114,10 @@ Scene::shader(std::string vertex_shader_src, std::string fragment_shader_src) {
     for (auto shader: shader_list) {
         glAttachShader(program, shader); check_error();
     }
-    std::cout << "test" << std::endl;
     GLint link_status=GL_TRUE;
     glLinkProgram(program);check_error();
     glGetProgramiv(program, GL_LINK_STATUS, &link_status);
-    if (link_status == false) {
+    if (link_status != GL_TRUE) {
         GLint log_size;
         char *program_log;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_size);
@@ -120,7 +133,45 @@ Scene::shader(std::string vertex_shader_src, std::string fragment_shader_src) {
         program=0;
         return false;
     }
-
+    program_ = program;
     glUseProgram(program);
+    return true;
+}
+
+
+bool
+Scene::init_object() {
+
+    GLuint vao;
+    int nb_obj = 0;
+    std::vector<GLuint> list_obj;
+    glGenVertexArrays(1, &vao);check_error();
+    glBindVertexArray(vao);check_error();
+    vao_ = vao;
+    vao_cpy = vao_;
+
+    GLint vertex_location = glGetAttribLocation(program_,"position");check_error();
+    GLint color_location = glGetAttribLocation(program_,"color");check_error();
+    if (vertex_location != -1)
+        nb_obj++;
+    if (color_location != -1)
+        nb_obj++;
+
+    list_obj.push_back(vertex_location);
+    list_obj.push_back(color_location);
+
+    // glGenBuffers(nb_obj, objs);
+
+    for (auto obj : list_obj) {
+        GLuint buffer_id;
+        std::cout << "test" << std::endl;
+        glGenBuffers(1, &buffer_id); check_error();
+        glBindBuffer(GL_ARRAY_BUFFER, obj); check_error();
+        glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW); check_error();
+        glVertexAttribPointer(obj, 3, GL_FLOAT, GL_FALSE, 0, 0); check_error();
+        glEnableVertexAttribArray(obj); check_error();
+    }
+
+    glBindVertexArray(0); check_error();
     return true;
 }

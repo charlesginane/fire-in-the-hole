@@ -8,6 +8,7 @@ int main(int argc, char *argv[]) {
     auto scene = Scene(1000, 1000);
     scene.init(argc, argv);
     scene.shader("src/scene/vertex.shd", "src/scene/fragment.shd");
+    scene.init_object();
     glutMainLoop();
     return 0;
 }
