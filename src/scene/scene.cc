@@ -10,6 +10,11 @@ void check_error() {
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1.0, 0, 0, 1.0);
+    glDrawArrays(GL_TRIANGLES, 0, 3); 
+    //glBindVertexArray(teapot_vao_id);check_error();
+    //glDrawArrays(GL_TRIANGLES, 0, vertex_buffer_data.size());check_error();
+    glBindVertexArray(0);check_error();
     glutSwapBuffers();
 }
 
@@ -34,10 +39,9 @@ Scene::init(int argc, char *argv[]) {
     glEnable(GL_DEPTH_TEST);check_error();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);check_error();
     glEnable(GL_CULL_FACE);check_error();
-    glClearColor(0.4,0.4,0.4,1.0);check_error();
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     glPixelStorei(GL_PACK_ALIGNMENT,1);
-    
+
     if (init_glew() == false) {
         std::cerr << "ERROR: failed to initialize glew" << std::endl;
         return false;
@@ -64,12 +68,12 @@ std::string load_file(std::string path_file) {
 bool
 Scene::shader(std::string vertex_shader_src, std::string fragment_shader_src) {
     std::vector<GLuint> shader_list(2);
-    glCreateShader(GL_VERTEX_SHADER);
-    // shader_list.push_back(glCreateShader(GL_VERTEX_SHADER)); check_error();
+    //glCreateShader(GL_VERTEX_SHADER);
+    shader_list.push_back(glCreateShader(GL_VERTEX_SHADER)); check_error();
     // std::cout << "test" << std::endl;
-    // shader_list.push_back(glCreateShader(GL_FRAGMENT_SHADER)); check_error();
-
+    shader_list.push_back(glCreateShader(GL_FRAGMENT_SHADER)); check_error();
     glShaderSource(shader_list[0], 1, (const GLchar**)(load_file(vertex_shader_src).c_str()), 0);check_error();
+    std::cout << "test" << std::endl;
     glShaderSource(shader_list[1], 1, (const GLchar**)(load_file(fragment_shader_src).c_str()), 0);check_error();
 
     for (auto shader : shader_list) {
@@ -77,7 +81,15 @@ Scene::shader(std::string vertex_shader_src, std::string fragment_shader_src) {
         glCompileShader(shader);check_error();
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compile_status);check_error();
         if(compile_status != GL_TRUE) {
-          std::cerr << "ERROR" << std::endl;
+          GLint log_size;
+          char *shader_log;
+          glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_size);
+          shader_log = (char*)std::malloc(log_size+1); /* +1 pour le caractere de fin de chaine '\0' */
+          if(shader_log == NULL) {
+    	         return false;
+          }
+          glGetShaderInfoLog(shader, log_size, &log_size, shader_log);
+          std::cerr << shader_log << std::endl;
           return false;
         }
     }
@@ -88,6 +100,7 @@ Scene::shader(std::string vertex_shader_src, std::string fragment_shader_src) {
     for (auto shader: shader_list) {
         glAttachShader(program, shader); check_error();
     }
+    std::cout << "test" << std::endl;
     GLint link_status=GL_TRUE;
     glLinkProgram(program);check_error();
     glGetProgramiv(program, GL_LINK_STATUS, &link_status);

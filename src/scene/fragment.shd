@@ -1,0 +1,9 @@
+#version 450
+
+in vec3 o_color;
+
+out vec4 output_color;
+
+void main() {
+    output_color = vec4(o_color, 1.0);
+}
