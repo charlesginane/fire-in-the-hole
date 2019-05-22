@@ -20,8 +20,9 @@ void check_error() {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 0, 0, 1.0);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    std::cout << vao_cpy << std::endl;
     glBindVertexArray(vao_cpy);check_error();
+    // glDrawArrays(GL_TRIANGLES, 0, 3);
     glDrawArrays(GL_TRIANGLES, 0, vertices_cpy.size());check_error();
     glBindVertexArray(0);check_error();
     glutSwapBuffers();
@@ -149,6 +150,7 @@ Scene::init_object() {
     glBindVertexArray(vao);check_error();
     vao_ = vao;
     vao_cpy = vao_;
+    std::cout << vao << std::endl;
 
     GLint vertex_location = glGetAttribLocation(program_,"position");check_error();
     GLint color_location = glGetAttribLocation(program_,"color");check_error();
@@ -160,18 +162,14 @@ Scene::init_object() {
     list_obj.push_back(vertex_location);
     list_obj.push_back(color_location);
 
-    // glGenBuffers(nb_obj, objs);
-
     for (auto obj : list_obj) {
-        GLuint buffer_id;
-        std::cout << "test" << std::endl;
-        glGenBuffers(1, &buffer_id); check_error();
-        glBindBuffer(GL_ARRAY_BUFFER, obj); check_error();
+        GLuint buff;
+        glGenBuffers(1, &buff); check_error();
+        glBindBuffer(GL_ARRAY_BUFFER, buff); check_error();
         glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW); check_error();
         glVertexAttribPointer(obj, 3, GL_FLOAT, GL_FALSE, 0, 0); check_error();
         glEnableVertexAttribArray(obj); check_error();
     }
-
     glBindVertexArray(0); check_error();
     return true;
 }
