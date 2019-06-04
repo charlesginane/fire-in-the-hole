@@ -11,6 +11,8 @@
   } while(0)
 
 GLuint program_compute = -1;
+float translate = 0.0f;
+bool up = true;
 
 
 static void My_timer_event(int program)
@@ -19,10 +21,25 @@ static void My_timer_event(int program)
     glUniform4f(vertexColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
 
     int translation = glGetUniformLocation(program, "translate");
-    glUniform1f(translation, 0.4f);
+
+    glUniform1f(translation, translate);
+    if (up) {
+        translate += 0.01f;
+    }
+    else {
+        translate -= 0.01f;
+    }
+
+    if (translate >= 1.0f) {
+        up = false;
+    }
+    else if (translate <= -1.0f) {
+        up = true;
+    }
     glBindVertexArray(0);
 
     glutPostRedisplay();
+    glutTimerFunc(10, My_timer_event, program);
 
 }
 
@@ -35,7 +52,7 @@ int main(int argc, char *argv[]) {
 
     auto program = scene.program_get();
 
-    glutTimerFunc(1000, My_timer_event, program),
+    glutTimerFunc(1000, My_timer_event, program);
 
     glutMainLoop();
     return 0;

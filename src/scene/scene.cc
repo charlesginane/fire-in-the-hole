@@ -7,20 +7,6 @@ GLuint textid_cpy = 0;
 
 std::vector<GLfloat> vertices_position = {
             0.0, 0.0, 0.0,
-            0.5, 0.0, 0.0,
-            0.5, 0.5, 0.0,
-
-            0.0, 0.0, 0.0,
-            0.0, 0.5, 0.0,
-            -0.5, 0.5, 0.0,
-
-            0.0, 0.0, 0.0,
-            -0.5, 0.0, 0.0,
-            -0.5, -0.5, 0.0,
-
-            0.0, 0.0, 0.0,
-            0.0, -0.5, 0.0,
-            0.5, -0.5, 0.0
         };
 
 
@@ -40,9 +26,9 @@ void check_error() {
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBindVertexArray(vao_cpy);check_error();
-    glDrawArrays(GL_TRIANGLES, 0, vertices_position.size());check_error();
-    glBindVertexArray(0);check_error();
+    glBindVertexArray(vao_cpy);TEST_OPENGL_ERROR();
+    glDrawArrays(GL_POINTS, 0, vertices_position.size());TEST_OPENGL_ERROR();
+    glBindVertexArray(0);TEST_OPENGL_ERROR();
     glutSwapBuffers();
 }
 
