@@ -10,13 +10,6 @@
 
 class Scene {
 
-std::vector<GLfloat> vertices = {
-    -1.0f, -1.0f,
-    -1.0f, 1.0f,
-    1.0f, -1.0f,
-    1.0f, 1.0f
-};
-
 public:
     /* Constructor */
     Scene(int width, int height);

@@ -12,22 +12,35 @@
 
 GLuint program_compute = -1;
 float translate = 0.0f;
+float red = 255;
+float blue = 255;
+float green = 255;
 bool up = true;
+int descent = 3;
 
 
 static void My_timer_event(int program)
 {
     int vertexColorLocation = glGetUniformLocation(program, "ourColor");
-    glUniform4f(vertexColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+    glUniform4f(vertexColorLocation, red / 255.0f, green / 255.0f, blue / 255.0f, 1.0f);
+
+    if (blue <= 0) {
+        if (green <= 0) {
+            red -= 2 * descent;
+        }
+        else
+            green -= descent;
+    }
+    else
+        blue -= descent;
 
     int translation = glGetUniformLocation(program, "translate");
-
     glUniform1f(translation, translate);
     if (up) {
-        translate += 0.01f;
+        translate += 0.0075f;
     }
     else {
-        translate -= 0.01f;
+        translate -= 0.0075f;
     }
 
     if (translate >= 1.0f) {

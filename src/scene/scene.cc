@@ -5,8 +5,8 @@ GLuint program_cpy = 0;
 GLuint program_compute_cpy = 0;
 GLuint textid_cpy = 0;
 
-std::vector<GLfloat> vertices_position = {
-            0.0, 0.0, 0.0,
+static const std::vector<GLfloat> vertices_position = {
+            -1.0f, -0.5f, -0.5f,
         };
 
 
@@ -194,6 +194,9 @@ Scene::init_object() {
     GLint vertex_location = glGetAttribLocation(program_,"position");TEST_OPENGL_ERROR();
     // GLint color_location = glGetAttribLocation(program_,"color");TEST_OPENGL_ERROR();
     std::cout << "size: " << vertices_position.size() << std::endl;
+    for (auto vert : vertices_position) {
+        std::cout << vert << std::endl;
+    }
     if (vertex_location != -1) {
         GLuint vbo;
         glGenBuffers(1, &vbo); TEST_OPENGL_ERROR();
