@@ -1,0 +1,24 @@
+
+* Fix first particle to 0,0,0 ?
+
+* Particle class
+    * Implement the class
+        * Adding a single particle
+        * Implement update method
+        * Change color and update translation
+        * Adding random translation
+
+* Particle motor
+    * Create a single particle
+    * Implement the udpate method
+
+* Scene
+    * Instanciation of particle motor
+    * Update method
+
+* Clean main
+
+* Test for differents particles (500)
+
+* 3D projection ?
+* Texture ?

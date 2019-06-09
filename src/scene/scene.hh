@@ -8,10 +8,13 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#include "particle_motor.hh"
+
 class Scene {
 
 public:
     /* Constructor */
+    Scene();
     Scene(int width, int height);
 
     bool init(int argc, char *argv[]);
@@ -20,11 +23,13 @@ public:
 
     bool init_object();
 
+    Motor init_motor(unsigned int nb_particles);
+
     GLuint init_texture();
 
     GLuint execution_compute_shader();
 
-    void update();
+    void update(int program, int nb_iter);
 
     /* Getters */
     GLuint program_compute_get() const;
@@ -41,4 +46,5 @@ private:
     GLuint vao_;
     GLuint program_compute_;
     GLuint textid_;
+    Motor motor_;
 };

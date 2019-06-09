@@ -1,18 +1,48 @@
 #include "particle.hh"
 
-Particle::Particle(GLuint radius, GLuint speed, vector::Vector3 position) : radius_(radius),
-                                                                     speed_(speed),
-                                                                     position_(position)
+Particle::Particle()
 {}
 
-void
-Particle::create() {
+Particle::Particle(GLuint radius, GLuint speed) : radius_(radius),
+                                                  speed_(speed)
+{
+    color_ = Color();
+    descent_ = 3;
+    // translate_ = 0.0f;
+}
 
+vector::Vector3
+Particle::create() {
+    auto x = (float)(((float)(rand() % 2000)) / 1000) - 1;
+    // std::cout << x << std::endl;
+    position_ = vector::Vector3(x, -0.5, 0.0);
+    // position_ = vector::Vector3(0, 0, 0);
+    return position_;
 }
 
 void
-Particle::evolution() {
-    position_ = position_ + vector::Vector3(0, 1, 1);
+Particle::update(GLint program, int nb_iter) {
+    
+    if (color_.blue <= 0) {
+        if (color_.green <= 0) {
+            color_.red -= 2 * (descent_);
+        }
+        else
+            color_.green -= (descent_);
+    }
+    else
+        color_.blue -= (descent_);
+    
+    translate_ += (0.0075f);
+
+    std::cout << translate_ << std::endl;
+
+    int vertexColorLocation = glGetUniformLocation(program, "ourColor");
+    glUniform4f(vertexColorLocation, color_.red / 255.0f, color_.green / 255.0f, color_.blue / 255.0f, 1.0f);
+    int translation = glGetUniformLocation(program, "translate");
+    glUniform1f(translation, translate_);
+
+    glBindVertexArray(0);
 }
 
 void
