@@ -13,9 +13,10 @@ Particle::Particle(GLuint radius, GLuint speed) : radius_(radius),
 
 vector::Vector3
 Particle::create() {
-    auto x = (float)(((float)(rand() % 2000)) / 1000) - 1;
+    auto x = (float)(((float)(rand() % 1000)) / 1000) - 0.5;
+    auto y = (float)(((float)(rand() % 1000)) / 10000) - 0.5;
     // std::cout << x << std::endl;
-    position_ = vector::Vector3(x, -0.5, 0.0);
+    position_ = vector::Vector3(x, y, 0.0);
     // position_ = vector::Vector3(0, 0, 0);
     return position_;
 }

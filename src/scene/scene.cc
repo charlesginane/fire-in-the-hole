@@ -214,7 +214,7 @@ Scene::init_object() {
     }
 
     int vertexColorLocation = glGetUniformLocation(program_, "ourColor");
-    glUniform4f(vertexColorLocation, 0.0f, 1.0f, 0.0f, 1.0f);
+    glUniform4f(vertexColorLocation, 1.0f, 1.0f, 0.0f, 1.0f);
 
     int translation = glGetUniformLocation(program_, "translate");
     glUniform1f(translation, 0.0f);
