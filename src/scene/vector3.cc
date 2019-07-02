@@ -5,36 +5,36 @@
 
 #include "vector3.hh"
 
-const float epsilon = 0.01f;
+const GLfloat epsilon = 0.01f;
 
 namespace vector
 {
     Vector3::Vector3()
     {}
 
-    Vector3::Vector3(float x, float y, float z) : x_(x), y_(y), z_(z)
+    Vector3::Vector3(GLfloat x, GLfloat y, GLfloat z) : x_(x), y_(y), z_(z)
     {}
 
-    float
+    GLfloat
     Vector3::x_get() const
     {
         return x_;
     }
 
-    float
+    GLfloat
     Vector3::y_get() const
     {
         return y_;
     }
 
-    float
+    GLfloat
     Vector3::z_get() const
     {
         return z_;
     }
 
     void
-    Vector3::vector_set(float x, float y, float z)
+    Vector3::vector_set(GLfloat x, GLfloat y, GLfloat z)
     {
         x_ = x;
         y_ = y;
@@ -54,7 +54,7 @@ namespace vector
     }
 
     Vector3
-    Vector3::operator*(const float coeff) const
+    Vector3::operator*(const GLfloat coeff) const
     {
         return Vector3(x_ * coeff, y_ * coeff, z_ * coeff);
     }
@@ -72,7 +72,7 @@ namespace vector
         return (fabs(x_ - other.x_) < epsilon) && (fabs(y_ - other.y_) < epsilon) && (fabs(z_ - other.z_) < epsilon);
     }
 
-    float
+    GLfloat
     Vector3::dot_product(const Vector3 other) const
     {
         return x_ * other.x_ + y_ * other.y_ + z_ * other.z_;
@@ -137,7 +137,7 @@ namespace vector
         return vecz;
     }
 
-    float
+    GLfloat
     Vector3::distance_get() const
     {
         return sqrt((x_ * x_) + (y_ * y_) + (z_ * z_));

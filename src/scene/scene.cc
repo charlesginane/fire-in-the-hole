@@ -5,11 +5,8 @@ GLuint program_cpy = 0;
 GLuint program_compute_cpy = 0;
 GLuint textid_cpy = 0;
 
-std::vector<float> list_positons_;
-
-static const std::vector<GLfloat> vertices_position = {
-            -1.0, -1.0f, -1.0f,
-        };
+std::vector<GLfloat> list_positons_;
+std::vector<GLfloat> list_color_;
 
 
 #define TEST_OPENGL_ERROR()                                                             \
@@ -30,9 +27,19 @@ void check_error() {
 }
 
 void display() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUseProgram(program_compute_cpy);
+    glBindTexture(GL_TEXTURE_2D, textid_cpy);
+    glBindImageTexture (0, textid_cpy, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    glDispatchCompute(40,30,1);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    glBindImageTexture (0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glUseProgram(0);
+    glUseProgram(program_cpy);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
     glBindVertexArray(vao_cpy);TEST_OPENGL_ERROR();
-    glDrawArrays(GL_POINTS, 0, list_positons_.size());TEST_OPENGL_ERROR();
+    //std::cout << list_positons_.size() << std::endl;
+    glDrawArrays(GL_POINTS, 0, list_positons_.size() / 3);TEST_OPENGL_ERROR();
     glBindVertexArray(0);TEST_OPENGL_ERROR();
     glutSwapBuffers();
 }
@@ -179,15 +186,14 @@ Scene::shader(std::string vertex_shader_src, std::string fragment_shader_src, st
     program_compute_ = program_compute;
     program_compute_cpy = program_compute_;
 
-
-
-
     glUseProgram(program);
 
     int translation = glGetUniformLocation(program, "translate");
     glUniform1f(translation, 0.0f);
     int vertexColorLocation = glGetUniformLocation(program, "ourColor");
     glUniform4f(vertexColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+    int special = glGetUniformLocation(program, "special");TEST_OPENGL_ERROR();
+    glUniform1i(special, 0);TEST_OPENGL_ERROR();
     return program;
 }
 
@@ -196,28 +202,39 @@ bool
 Scene::init_object() {
 
     GLuint vao;
-    glUseProgram(program_);
+    // glUseProgram(program_);
 
     glGenVertexArrays(1, &vao);TEST_OPENGL_ERROR();
     glBindVertexArray(vao);TEST_OPENGL_ERROR();
     vao_ = vao;
     vao_cpy = vao_;
-    std::cout << "size_position: " << list_positons_.size() << std::endl;
     GLint vertex_location = glGetAttribLocation(program_,"position");TEST_OPENGL_ERROR();
+    GLint color_location = glGetAttribLocation(program_,"color");TEST_OPENGL_ERROR();
     if (vertex_location != -1) {
         GLuint vbo;
         glGenBuffers(1, &vbo); TEST_OPENGL_ERROR();
         glBindBuffer(GL_ARRAY_BUFFER, vbo); TEST_OPENGL_ERROR();
-        glBufferData(GL_ARRAY_BUFFER, list_positons_.size()*sizeof(float), list_positons_.data(), GL_STREAM_DRAW); TEST_OPENGL_ERROR();
+        glBufferData(GL_ARRAY_BUFFER, list_positons_.size() * sizeof(float), list_positons_.data(),  GL_DYNAMIC_DRAW); TEST_OPENGL_ERROR();
         glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0, 0); TEST_OPENGL_ERROR();
         glEnableVertexAttribArray(vertex_location); TEST_OPENGL_ERROR();
+        vbo_vertices_ = vbo;
+        std::cout << vbo_vertices_ << std::endl;
     }
 
-    int vertexColorLocation = glGetUniformLocation(program_, "ourColor");
-    glUniform4f(vertexColorLocation, 1.0f, 1.0f, 0.0f, 1.0f);
+    if (color_location != -1) {
+        GLuint vbo;
+        glGenBuffers(1, &vbo); TEST_OPENGL_ERROR();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo); TEST_OPENGL_ERROR();
+        glBufferData(GL_ARRAY_BUFFER, list_color_.size() * sizeof(float), list_color_.data(),  GL_DYNAMIC_DRAW); TEST_OPENGL_ERROR();
+        glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, 0, 0); TEST_OPENGL_ERROR();
+        glEnableVertexAttribArray(color_location); TEST_OPENGL_ERROR();
+    }
 
-    int translation = glGetUniformLocation(program_, "translate");
-    glUniform1f(translation, 0.0f);
+    // int vertexColorLocation = glGetUniformLocation(program_, "ourColor");
+    // glUniform4f(vertexColorLocation, 1.0f, 1.0f, 0.0f, 1.0f);
+
+    // int translation = glGetUniformLocation(program_, "translate");
+    // glUniform1f(translation, 0.0f);
 
     glBindVertexArray(0);
     return true;
@@ -246,17 +263,33 @@ Scene::init_texture() {
 Motor
 Scene::init_motor(unsigned int nb_particles) {
     motor_ = Motor(nb_particles);
-    auto list_pos = motor_.create();
-    list_positons_ = list_pos;
+    auto list_pos = motor_.create(0);
+    list_positons_ = std::get<0>(list_pos);
+    list_color_ = std::get<1>(list_pos);
+    std::cout << list_color_.size() << std::endl;
     return motor_;
 }
 
 void
-Scene::update(int program, int nb_iter) {
-    motor_.update(program, nb_iter);
-    // auto list_pos = motor_.create();
-    // for (auto pos : list_pos)
-    //     list_positons_.push_back(pos);
+Scene::update(int program) {
+    auto new_list = motor_.create(300);
+    auto list_pos = motor_.update(program);
+
+    glBindVertexArray(vao_);TEST_OPENGL_ERROR();
+    list_color_ = std::get<1>(list_pos);
+    list_color_.insert(list_color_.end(), std::get<1>(list_pos).begin(), std::get<1>(list_pos).end());
+    glBufferData(GL_ARRAY_BUFFER, list_color_.size()*sizeof(float), list_color_.data(), GL_STREAM_DRAW);TEST_OPENGL_ERROR();
+    std::cout << list_color_.size() << std::endl;
+    glBindVertexArray(0);TEST_OPENGL_ERROR();
+
+
+    //std::cout << "before: " << list_positons_.size() << std::endl;
+    list_positons_ = std::get<0>(new_list);
+    list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).begin(), std::get<0>(list_pos).end());
+    glBindVertexArray(vao_);TEST_OPENGL_ERROR();
+    glBufferData(GL_ARRAY_BUFFER, list_positons_.size()*sizeof(float), list_positons_.data(), GL_STREAM_DRAW);TEST_OPENGL_ERROR();
+    glBindVertexArray(0);TEST_OPENGL_ERROR();
+
 }
 
 

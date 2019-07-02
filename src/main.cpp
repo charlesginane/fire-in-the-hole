@@ -13,64 +13,33 @@
 
 Scene scene;
 
-void My_timer_event(int nb_iter)
+void My_timer_event(int program)
 {
-    // int vertexColorLocation = glGetUniformLocation(program, "ourColor");
-    // glUniform4f(vertexColorLocation, red / 255.0f, green / 255.0f, blue / 255.0f, 1.0f);
-
-    // if (blue <= 0) {
-    //     if (green <= 0) {
-    //         red -= 2 * descent;
-    //     }
-    //     else
-    //         green -= descent;
-    // }
-    // else
-    //     blue -= descent;
-    //
-    // int translation = glGetUniformLocation(program, "translate");
-    // glUniform1f(translation, translate);
-    // if (up) {
-    //     translate += 0.0075f;
-    // }
-    // else {
-    //     translate -= 0.0075f;
-    // }
-    //
-    // if (translate >= 1.0f) {
-    //     up = false;
-    // }
-    // else if (translate <= -1.0f) {
-    //     up = true;
-    // }
-    // glBindVertexArray(0);
-    scene.update(scene.program_get(), nb_iter);
+    scene.update(program);
     glutPostRedisplay();
-    glutTimerFunc(100, My_timer_event, ++nb_iter);
+    glutTimerFunc(10, My_timer_event, program);
 
 }
 
 int main(int argc, char *argv[]) {
-    scene = Scene(512, 512);
+    scene = Scene(2000, 2000);
     scene.init(argc, argv);
     scene.shader("src/scene/vertex.shd", "src/scene/fragment.shd", "src/scene/compute_shader.shd");
     scene.init_motor(500);
     scene.init_object();
+    scene.init_texture();
     auto program = scene.program_get();
 
-    glutTimerFunc(1000, My_timer_event, 0);
-    // for (int i = 0; i < 1024; ++i) {
-    //     scene.update(program, i);
-    // }
+    int work_grp_cnt[3];
 
-    // std::vector<Particle> list_p;
-    // auto p = Particle(1, 1);
-    // list_p.push_back(p);
-    // for (int i = 0; i < 3; ++i) {
-    //   for (auto& par: list_p) {
-    //     par.update(program, 1);
-    //   }
-    // }
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_grp_cnt[0]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &work_grp_cnt[1]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &work_grp_cnt[2]);
+
+printf("max global (total) work group size x:%i y:%i z:%i\n",
+  work_grp_cnt[0], work_grp_cnt[1], work_grp_cnt[2]);
+
+    glutTimerFunc(1000, My_timer_event, program);
     glutMainLoop();
     return 0;
 }

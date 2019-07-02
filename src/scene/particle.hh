@@ -5,30 +5,35 @@
 
 #include "vector3.hh"
 
+struct Color {
+    GLfloat red = 255;
+    GLfloat green = 255;
+    GLfloat blue = 255;
+};
+
 class Particle {
     public:
-        struct Color {
-            float red = 255;
-            float green = 255;
-            float blue = 255;
-        };
 
         Particle();
-        Particle(GLuint radius, GLuint speed);
+        Particle(GLuint radius, float speed, int id);
 
-        vector::Vector3 create();
+        vector::Vector3 create(int special);
 
-        void update(GLint program, int nb_iter);
+        vector::Vector3 update(GLint program);
 
         void destruct();
 
         vector::Vector3 position_get() const;
 
+        struct Color color_get() const;
+
     private:
         GLuint radius_;
-        GLuint speed_;
+        float speed_;
         int descent_;
         vector::Vector3 position_;
+        int id_;
         struct Color color_;
         float translate_;
+        int special_;
 };

@@ -8,6 +8,10 @@
 #include <cmath>
 #include <iostream>
 
+
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+
 namespace vector
 {
     /// Vector3.
@@ -18,7 +22,7 @@ namespace vector
           /** \name Constructors
            ** \{ */
           /// Construct a vector with 3 coordonates.
-          Vector3(float x, float y, float z);
+          Vector3(GLfloat x, GLfloat y, GLfloat z);
 
           Vector3();
           /** \} */
@@ -30,7 +34,7 @@ namespace vector
           void print(std::ostream& ostr) const;
 
           /// Perform the dot product between self vector and other vector and return the new vector.
-          float dot_product(const Vector3 other) const;
+          GLfloat dot_product(const Vector3 other) const;
 
           /// Perform the cross product between self vector and other vector adn return the new vector.
           Vector3 cross_product(const Vector3 other) const;
@@ -45,18 +49,18 @@ namespace vector
           Vector3 rotate(const Vector3 angle) const;
 
           /// Return the distance of the vector.
-          float distance_get() const;
+          GLfloat distance_get() const;
           /** \} */
 
           /* getters */
           /** \name Getters & setters
            ** \{ */
-          float x_get() const;
-          float y_get() const;
-          float z_get() const;
+          GLfloat x_get() const;
+          GLfloat y_get() const;
+          GLfloat z_get() const;
 
           /* setters */
-          void vector_set(float x, float y, float z);
+          void vector_set(GLfloat x, GLfloat y, GLfloat z);
           /** \} */
 
           /* operators */
@@ -67,7 +71,7 @@ namespace vector
 
           Vector3 operator-(const Vector3 other) const;
 
-          Vector3 operator*(const float coeff) const;
+          Vector3 operator*(const GLfloat coeff) const;
 
           Vector3 operator*(const double coeff) const;
 
@@ -83,8 +87,8 @@ namespace vector
 
         private:
           /* Atributes */
-          float x_;
-          float y_;
-          float z_;
+          GLfloat x_;
+          GLfloat y_;
+          GLfloat z_;
       };
 }

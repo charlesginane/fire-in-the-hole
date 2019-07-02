@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <tuple>
 #include <vector>
 
 #include <GL/glew.h>
@@ -29,7 +30,7 @@ public:
 
     GLuint execution_compute_shader();
 
-    void update(int program, int nb_iter);
+    void update(int program);
 
     /* Getters */
     GLuint program_compute_get() const;
@@ -47,4 +48,5 @@ private:
     GLuint program_compute_;
     GLuint textid_;
     Motor motor_;
+    GLuint vbo_vertices_;
 };
