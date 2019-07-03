@@ -31,7 +31,6 @@ Scene::display() {
     glUseProgram(program_cpy);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
     glBindVertexArray(vao_cpy);TEST_OPENGL_ERROR();
-    std::cout << "size" << list_positons_.size() << std::endl;
     glDrawArrays(GL_POINTS, 0, list_positons_.size() / 3);TEST_OPENGL_ERROR();
     glBindVertexArray(0);TEST_OPENGL_ERROR();
     glfwSwapBuffers(window_);
@@ -57,7 +56,7 @@ Scene::init(int argc, char *argv[]) {
     window_ = window;
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
@@ -103,8 +102,6 @@ Scene::shader(std::string vertex_shader_src, std::string fragment_shader_src, st
     std::vector<GLuint> shader_list;
     std::string content;
     const char* content_char;
-
-    std::cout << "ss " << std::endl;
 
     auto vertex_shader = glCreateShader(GL_VERTEX_SHADER); TEST_OPENGL_ERROR();
     auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER); TEST_OPENGL_ERROR();
@@ -214,8 +211,6 @@ Scene::init_object() {
     vao_cpy = vao_;
     GLint vertex_location = glGetAttribLocation(program_,"position");TEST_OPENGL_ERROR();
     GLint color_location = glGetAttribLocation(program_,"color");TEST_OPENGL_ERROR();
-    std::cout << vertex_location << std::endl;
-    std::cout << color_location << std::endl;
     if (vertex_location != -1) {
         GLuint vbo;
         glGenBuffers(1, &vbo); TEST_OPENGL_ERROR();
@@ -224,7 +219,6 @@ Scene::init_object() {
         glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0, 0); TEST_OPENGL_ERROR();
         glEnableVertexAttribArray(vertex_location); TEST_OPENGL_ERROR();
         vbo_vertices_ = vbo;
-        std::cout << vbo_vertices_ << std::endl;
     }
 
     if (color_location != -1) {
@@ -272,7 +266,6 @@ Scene::init_motor(unsigned int nb_particles) {
     auto list_pos = motor_.create(0);
     list_positons_ = std::get<0>(list_pos);
     list_color_ = std::get<1>(list_pos);
-    std::cout << list_color_.size() << std::endl;
     return motor_;
 }
 
@@ -281,27 +274,11 @@ Scene::update(int program) {
     auto new_list = motor_.create(300);
     auto list_pos = motor_.update(program);
 
-    //glfwSwapBuffers(window_);
-
-    glBindVertexArray(vao_);TEST_OPENGL_ERROR();
-    list_color_ = std::get<1>(list_pos);
+    list_color_ = std::get<1>(new_list);
     list_color_.insert(list_color_.end(), std::get<1>(list_pos).begin(), std::get<1>(list_pos).end());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(std::get<1>(list_pos)) * sizeof(float), &std::get<1>(list_pos));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-    glBufferData(GL_ARRAY_BUFFER, list_color_.size()*sizeof(float), list_color_.data(), GL_DYNAMIC_DRAW);TEST_OPENGL_ERROR();
-    //std::cout << list_color_.size() << std::endl;
-    glBindVertexArray(0);TEST_OPENGL_ERROR();
 
-    glBindVertexArray(vao_);TEST_OPENGL_ERROR();
     list_positons_ = std::get<0>(new_list);
-    list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).begin(), std::get<0>(list_pos).end());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(std::get<0>(list_pos)) * sizeof(float), &std::get<0>(list_pos));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-    glBufferData(GL_ARRAY_BUFFER, list_positons_.size()*sizeof(float), list_positons_.data(), GL_DYNAMIC_DRAW);TEST_OPENGL_ERROR();
-    glBindVertexArray(0);TEST_OPENGL_ERROR();
-
-
-    //std::cout << "before: " << list_positons_.size() << std::endl;
+    list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).begin(), std::get<0>(list_pos).end());TEST_OPENGL_ERROR();
 
 }
 

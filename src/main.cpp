@@ -46,8 +46,9 @@ int main(int argc, char *argv[]) {
         // glUseProgram(program);
         // glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
         scene.display();
-        glfwPollEvents();
         scene.update(program);
+        scene.init_object();
+        glfwPollEvents();
     }
     glfwDestroyWindow(scene.window_get());
     glfwTerminate();

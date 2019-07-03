@@ -6,7 +6,7 @@ uniform vec4 ourColor;
 uniform float translate;
 uniform int special;
 
-out vec4 out_color;
+out vec3 out_color;
 
 
 mat4 model_view_matrix = mat4(
@@ -23,5 +23,5 @@ void main() {
 	 gl_Position = vec4(position.x, position.y, position.z, 1.0);
 	 gl_PointSize = 10.0;
 
-	 out_color = vec4(color, 1.0);
+	 out_color = color;
 }

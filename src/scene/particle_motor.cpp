@@ -13,7 +13,6 @@ Motor::create(int nb) {
 
     for (int i = 0; i < nb; ++i) {
         Particle p = Particle(1, 0.01, i);
-        list_particles_.push_back(p);
         vector::Vector3 pos_p;
         if (i >= 250) {
             pos_p = p.create(1);
@@ -28,6 +27,8 @@ Motor::create(int nb) {
         list_color.push_back(c.red);
         list_color.push_back(c.green);
         list_color.push_back(c.blue);
+
+        list_particles_.push_back(p);
     }
     return std::make_tuple(list_pos, list_color);
 }
@@ -47,10 +48,11 @@ Motor::update(GLint program) {
         list_position.push_back(pos.y_get());
         list_position.push_back(pos.z_get());
 
-                auto c = p.color_get();
-        list_color.push_back(c.red);
-        list_color.push_back(c.green);
-        list_color.push_back(c.blue);
+
+        auto c = p.color_get();
+        list_color.push_back(c.red / 255);
+        list_color.push_back(c.green / 255);
+        list_color.push_back(c.blue / 255);
     }
     return std::make_tuple(list_position, list_color);
 

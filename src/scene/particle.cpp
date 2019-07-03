@@ -10,7 +10,7 @@ Particle::Particle(GLuint radius, float speed, int id) : radius_(radius),
                                                   id_(id)
 {
     color_ = Color();
-    descent_ = 3;
+    descent_ = 10;
     // translate_ = 0.0f;
 }
 
@@ -26,7 +26,6 @@ Particle::create(int special) {
 
 vector::Vector3
 Particle::update(GLint program) {
-
     if (color_.blue <= 0) {
         if (color_.green <= 0) {
             color_.red -= 2 * (descent_);
@@ -38,6 +37,7 @@ Particle::update(GLint program) {
         color_.blue -= (descent_);
 
     translate_ += speed_;
+
 
 
     int vertexColorLocation = glGetUniformLocation(program, "ourColor");
