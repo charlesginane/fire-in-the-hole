@@ -39,11 +39,11 @@ Motor::list_particles_get() const {
 }
 
 std::tuple<std::vector<GLfloat>, std::vector<GLfloat>>
-Motor::update(GLint program) {
+Motor::update(GLint program, int wind) {
     std::vector<GLfloat> list_position;
     std::vector<GLfloat> list_color;
     for (auto& p : list_particles_) {
-        auto pos = p.update(program);
+        auto pos = p.update(program, wind);
         list_position.push_back(pos.x_get());
         list_position.push_back(pos.y_get());
         list_position.push_back(pos.z_get());
@@ -55,5 +55,10 @@ Motor::update(GLint program) {
         list_color.push_back(c.blue / 255);
     }
     return std::make_tuple(list_position, list_color);
+}
 
+void
+Motor::kill(int nb) {
+    for (int i = 0; i < 300; ++i)
+        list_particles_.erase(list_particles_.begin());
 }

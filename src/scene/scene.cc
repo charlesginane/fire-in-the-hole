@@ -8,12 +8,23 @@ GLuint textid_cpy = 0;
 std::vector<GLfloat> list_positons_;
 std::vector<GLfloat> list_color_;
 
+int wind_select = 0;
+
 
 #define TEST_OPENGL_ERROR()                                                             \
   do {									\
     GLenum err = glGetError();					                        \
     if (err != GL_NO_ERROR) std::cerr << "OpenGL ERROR!" << __LINE__ << std::endl;      \
   } while(0)
+
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_O && action == GLFW_PRESS)
+        wind_select ++;
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+        wind_select --;
+}
 
 Scene::Scene() : width_(0), height_(0), motor_(Motor(0))
 {}
@@ -62,6 +73,7 @@ Scene::init(int argc, char *argv[]) {
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetKeyCallback(window, key_callback);
 
     glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
     glEnable(GL_PROGRAM_POINT_SIZE);TEST_OPENGL_ERROR();
@@ -203,7 +215,6 @@ bool
 Scene::init_object() {
 
     GLuint vao;
-    // glUseProgram(program_);
 
     glGenVertexArrays(1, &vao);TEST_OPENGL_ERROR();
     glBindVertexArray(vao);TEST_OPENGL_ERROR();
@@ -229,12 +240,6 @@ Scene::init_object() {
         glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, 0, 0); TEST_OPENGL_ERROR();
         glEnableVertexAttribArray(color_location); TEST_OPENGL_ERROR();
     }
-
-    // int vertexColorLocation = glGetUniformLocation(program_, "ourColor");
-    // glUniform4f(vertexColorLocation, 1.0f, 1.0f, 0.0f, 1.0f);
-
-    // int translation = glGetUniformLocation(program_, "translate");
-    // glUniform1f(translation, 0.0f);
 
     glBindVertexArray(0);
     return true;
@@ -272,13 +277,21 @@ Scene::init_motor(unsigned int nb_particles) {
 void
 Scene::update(int program) {
     auto new_list = motor_.create(300);
-    auto list_pos = motor_.update(program);
+    auto list_pos = motor_.update(program, wind_select);
 
     list_color_ = std::get<1>(new_list);
-    list_color_.insert(list_color_.end(), std::get<1>(list_pos).begin(), std::get<1>(list_pos).end());
 
     list_positons_ = std::get<0>(new_list);
-    list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).begin(), std::get<0>(list_pos).end());TEST_OPENGL_ERROR();
+
+    if (std::get<1>(list_pos).size() >= 60000) {
+        list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).end() - 60000, std::get<0>(list_pos).end());TEST_OPENGL_ERROR();
+        list_color_.insert(list_color_.end(), std::get<1>(list_pos).end() - 60000, std::get<1>(list_pos).end());
+        motor_.kill(300);
+    }
+    else {
+        list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).begin(), std::get<0>(list_pos).end());TEST_OPENGL_ERROR();
+        list_color_.insert(list_color_.end(), std::get<1>(list_pos).begin(), std::get<1>(list_pos).end());
+    }
 
 }
 
@@ -302,6 +315,7 @@ GLFWwindow*
 Scene::window_get() const {
     return window_;
 }
+
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------

@@ -13,9 +13,11 @@ public:
 
     std::tuple<std::vector<GLfloat>, std::vector<GLfloat>> create(int nb);
 
-    std::tuple<std::vector<GLfloat>, std::vector<GLfloat>> update(GLint program);
+    std::tuple<std::vector<GLfloat>, std::vector<GLfloat>> update(GLint program, int wind);
 
     std::vector<Particle> list_particles_get() const;
+
+    void kill(int nb);
 
 private:
     unsigned int nb_particles_;

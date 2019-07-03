@@ -19,7 +19,7 @@ class Particle {
 
         vector::Vector3 create(int special);
 
-        vector::Vector3 update(GLint program);
+        vector::Vector3 update(GLint program, int wind);
 
         void destruct();
 
