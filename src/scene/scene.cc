@@ -26,42 +26,46 @@ void check_error() {
         std::cerr << "ERROR:" << __LINE__ << std::endl;
 }
 
-void display() {
-    glUseProgram(program_compute_cpy);
-    glBindTexture(GL_TEXTURE_2D, textid_cpy);
-    glBindImageTexture (0, textid_cpy, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-    glDispatchCompute(40,30,1);
-    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-    glBindImageTexture (0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glUseProgram(0);
+void
+Scene::display() {
     glUseProgram(program_cpy);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
     glBindVertexArray(vao_cpy);TEST_OPENGL_ERROR();
-    //std::cout << list_positons_.size() << std::endl;
+    std::cout << "size" << list_positons_.size() << std::endl;
     glDrawArrays(GL_POINTS, 0, list_positons_.size() / 3);TEST_OPENGL_ERROR();
     glBindVertexArray(0);TEST_OPENGL_ERROR();
-    glutSwapBuffers();
+    glfwSwapBuffers(window_);
 }
 
 bool init_glew() {
     return (glewInit() == GLEW_OK);
 }
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
 bool
 Scene::init(int argc, char *argv[]) {
     /* Init all of size*/
-    glutInit(&argc, argv);
-    glutInitContextVersion(4,5);
-    glutInitContextProfile(GLUT_CORE_PROFILE|GLUT_DEBUG); TEST_OPENGL_ERROR();
-    glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH); TEST_OPENGL_ERROR();
-    glutInitWindowSize(width_, height_);TEST_OPENGL_ERROR();
-    glutInitWindowPosition (100, 100);
-    window_ = glutCreateWindow("Fire in the hole");
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // glfw window creation
+    // --------------------
+    auto window = glfwCreateWindow(width_, height_, "fire in the hole", NULL, NULL);
+    window_ = window;
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
     glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
     glEnable(GL_PROGRAM_POINT_SIZE);TEST_OPENGL_ERROR();
-    glutDisplayFunc(display);
-
     if (init_glew() == false) {
         std::cerr << "ERROR: failed to initialize glew" << std::endl;
         return false;
@@ -210,6 +214,8 @@ Scene::init_object() {
     vao_cpy = vao_;
     GLint vertex_location = glGetAttribLocation(program_,"position");TEST_OPENGL_ERROR();
     GLint color_location = glGetAttribLocation(program_,"color");TEST_OPENGL_ERROR();
+    std::cout << vertex_location << std::endl;
+    std::cout << color_location << std::endl;
     if (vertex_location != -1) {
         GLuint vbo;
         glGenBuffers(1, &vbo); TEST_OPENGL_ERROR();
@@ -275,20 +281,27 @@ Scene::update(int program) {
     auto new_list = motor_.create(300);
     auto list_pos = motor_.update(program);
 
+    //glfwSwapBuffers(window_);
+
     glBindVertexArray(vao_);TEST_OPENGL_ERROR();
     list_color_ = std::get<1>(list_pos);
     list_color_.insert(list_color_.end(), std::get<1>(list_pos).begin(), std::get<1>(list_pos).end());
-    glBufferData(GL_ARRAY_BUFFER, list_color_.size()*sizeof(float), list_color_.data(), GL_STREAM_DRAW);TEST_OPENGL_ERROR();
-    std::cout << list_color_.size() << std::endl;
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(std::get<1>(list_pos)) * sizeof(float), &std::get<1>(list_pos));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+    glBufferData(GL_ARRAY_BUFFER, list_color_.size()*sizeof(float), list_color_.data(), GL_DYNAMIC_DRAW);TEST_OPENGL_ERROR();
+    //std::cout << list_color_.size() << std::endl;
+    glBindVertexArray(0);TEST_OPENGL_ERROR();
+
+    glBindVertexArray(vao_);TEST_OPENGL_ERROR();
+    list_positons_ = std::get<0>(new_list);
+    list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).begin(), std::get<0>(list_pos).end());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(std::get<0>(list_pos)) * sizeof(float), &std::get<0>(list_pos));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+    glBufferData(GL_ARRAY_BUFFER, list_positons_.size()*sizeof(float), list_positons_.data(), GL_DYNAMIC_DRAW);TEST_OPENGL_ERROR();
     glBindVertexArray(0);TEST_OPENGL_ERROR();
 
 
     //std::cout << "before: " << list_positons_.size() << std::endl;
-    list_positons_ = std::get<0>(new_list);
-    list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).begin(), std::get<0>(list_pos).end());
-    glBindVertexArray(vao_);TEST_OPENGL_ERROR();
-    glBufferData(GL_ARRAY_BUFFER, list_positons_.size()*sizeof(float), list_positons_.data(), GL_STREAM_DRAW);TEST_OPENGL_ERROR();
-    glBindVertexArray(0);TEST_OPENGL_ERROR();
 
 }
 
@@ -306,4 +319,18 @@ Scene::program_get() const {
 GLuint
 Scene::vao_get() const {
     return vao_;
+}
+
+GLFWwindow*
+Scene::window_get() const {
+    return window_;
+}
+
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
 }
