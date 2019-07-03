@@ -18,7 +18,7 @@ class Scene {
 public:
     /* Constructor */
     Scene();
-    Scene(int width, int height);
+    Scene(int width, int height, int  max_part);
 
     bool init(int argc, char *argv[]);
 
@@ -55,4 +55,5 @@ private:
     Motor motor_;
     GLuint vbo_vertices_;
     GLFWwindow* window_;
+    int max_particules_;
 };

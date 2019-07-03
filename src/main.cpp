@@ -22,7 +22,7 @@ void My_timer_event(int program)
 }
 
 int main(int argc, char *argv[]) {
-    scene = Scene(2000, 2000);
+    scene = Scene(2000, 2000, 60000);
     scene.init(argc, argv);
     scene.shader("src/scene/vertex.shd", "src/scene/fragment.shd", "src/scene/compute_shader.shd");
     scene.init_motor(500);
@@ -32,19 +32,6 @@ int main(int argc, char *argv[]) {
 
     while (!glfwWindowShouldClose(scene.window_get()))
     {
-        // float ratio;
-        // int width, height;
-        // mat4x4 m, p, mvp;
-        // glfwGetFramebufferSize(window, &width, &height);
-        // ratio = width / (float) height;
-        // glViewport(0, 0, width, height);
-        // glClear(GL_COLOR_BUFFER_BIT);
-        // mat4x4_identity(m);
-        // mat4x4_rotate_Z(m, m, (float) glfwGetTime());
-        // mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        // mat4x4_mul(mvp, p, m);
-        // glUseProgram(program);
-        // glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
         scene.display();
         scene.update(program);
         scene.init_object();

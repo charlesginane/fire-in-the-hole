@@ -29,7 +29,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 Scene::Scene() : width_(0), height_(0), motor_(Motor(0))
 {}
 
-Scene::Scene(int width, int height) : width_(width), height_(height), motor_(Motor(0))
+Scene::Scene(int width, int height, int max_part) : width_(width), height_(height), motor_(Motor(0)), max_particules_(max_part)
 {}
 
 void check_error() {
@@ -283,9 +283,9 @@ Scene::update(int program) {
 
     list_positons_ = std::get<0>(new_list);
 
-    if (std::get<1>(list_pos).size() >= 60000) {
-        list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).end() - 60000, std::get<0>(list_pos).end());TEST_OPENGL_ERROR();
-        list_color_.insert(list_color_.end(), std::get<1>(list_pos).end() - 60000, std::get<1>(list_pos).end());
+    if (std::get<1>(list_pos).size() >= max_particules_) {
+        list_positons_.insert(list_positons_.end(), std::get<0>(list_pos).end() - max_particules_, std::get<0>(list_pos).end());TEST_OPENGL_ERROR();
+        list_color_.insert(list_color_.end(), std::get<1>(list_pos).end() - max_particules_, std::get<1>(list_pos).end());
         motor_.kill(300);
     }
     else {
