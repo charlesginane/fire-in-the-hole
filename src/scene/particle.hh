@@ -13,18 +13,20 @@ struct Color {
 
 class Particle {
     public:
-
+        /* Constructors */
         Particle();
         Particle(GLuint radius, float speed, int id);
 
-        vector::Vector3 create(int special);
+        /* Create a particle */
+        vector::Vector3 create();
 
-        vector::Vector3 update(GLint program, int wind);
+        /* Update the particle */
+        vector::Vector3 update(int wind);
 
-        void destruct();
-
+        /* Get the position */
         vector::Vector3 position_get() const;
 
+        /* Get the color */
         struct Color color_get() const;
 
     private:
@@ -35,5 +37,4 @@ class Particle {
         int id_;
         struct Color color_;
         float translate_;
-        int special_;
 };

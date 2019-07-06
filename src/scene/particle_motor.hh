@@ -11,12 +11,16 @@ class Motor {
 public:
     Motor(unsigned int nb_particles);
 
+    /* Create nb particles */
     std::tuple<std::vector<GLfloat>, std::vector<GLfloat>> create(int nb);
 
-    std::tuple<std::vector<GLfloat>, std::vector<GLfloat>> update(GLint program, int wind);
+    /* Update particles */
+    std::tuple<std::vector<GLfloat>, std::vector<GLfloat>> update(int wind);
 
+    // Get the list
     std::vector<Particle> list_particles_get() const;
 
+    // Delete nb particles
     void kill(int nb);
 
 private:

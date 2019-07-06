@@ -18,27 +18,23 @@ class Scene {
 public:
     /* Constructor */
     Scene();
-    Scene(int width, int height, int  max_part);
+    Scene(int width, int height, unsigned int max_part);
 
-    bool init(int argc, char *argv[]);
+    bool init();
 
     void display();
 
-    GLuint shader(std::string vertex_shader_src, std::string fragment_shader_src, std::string compute_shader_src);
+    GLint shader(std::string vertex_shader_src, std::string fragment_shader_src);
 
     bool init_object();
 
     Motor init_motor(unsigned int nb_particles);
 
-    GLuint init_texture();
-
     GLuint execution_compute_shader();
 
-    void update(int program);
+    void update();
 
     /* Getters */
-    GLuint program_compute_get() const;
-
     GLuint program_get() const;
 
     GLuint vao_get() const;
@@ -50,10 +46,9 @@ private:
     int height_;
     GLuint program_;
     GLuint vao_;
-    GLuint program_compute_;
-    GLuint textid_;
+    GLint vbo_vertices_;
+    GLint vbo_color_;
     Motor motor_;
-    GLuint vbo_vertices_;
     GLFWwindow* window_;
-    int max_particules_;
+    unsigned int max_particules_;
 };

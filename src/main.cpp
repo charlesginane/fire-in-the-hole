@@ -13,27 +13,26 @@
 
 Scene scene;
 
-void My_timer_event(int program)
-{
-    scene.update(program);
-    //glutPostRedisplay();
-    //glutTimerFunc(10, My_timer_event, program);
-
-}
-
-int main(int argc, char *argv[]) {
+int main() {
+    /* init the scene */
     scene = Scene(2000, 2000, 60000);
-    scene.init(argc, argv);
-    scene.shader("src/scene/vertex.shd", "src/scene/fragment.shd", "src/scene/compute_shader.shd");
+    if (scene.init() == false) {
+        std::cerr << "\033[34m ERROR: Failed to initialize the scene!" << std::endl;
+        return 1;
+    }
+
+    if (scene.shader("src/scene/vertex.shd", "src/scene/fragment.shd") == -1) {
+        std::cerr << "\033[34m ERROR: Failed to initialize shaders!" << std::endl;
+        return 2;
+    }
     scene.init_motor(500);
     scene.init_object();
-    scene.init_texture();
-    auto program = scene.program_get();
 
+    /* Loop */
     while (!glfwWindowShouldClose(scene.window_get()))
     {
         scene.display();
-        scene.update(program);
+        scene.update();
         scene.init_object();
         glfwPollEvents();
     }

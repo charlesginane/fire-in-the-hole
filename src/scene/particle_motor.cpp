@@ -8,21 +8,21 @@ Motor::create(int nb) {
     std::vector<GLfloat> list_pos;
     std::vector<GLfloat> list_color;
 
+    /* Default value */
     if (nb == 0)
         nb = nb_particles_;
 
     for (int i = 0; i < nb; ++i) {
         Particle p = Particle(1, 0.01, i);
         vector::Vector3 pos_p;
-        if (i >= 250) {
-            pos_p = p.create(1);
-        }
-        else
-            pos_p = p.create(0);
+        pos_p = p.create();
+
+        /* Get the position */
         list_pos.push_back(pos_p.x_get());
         list_pos.push_back(pos_p.y_get());
         list_pos.push_back(pos_p.z_get());
 
+        /* Get the color */
         auto c = p.color_get();
         list_color.push_back(c.red);
         list_color.push_back(c.green);
@@ -39,16 +39,19 @@ Motor::list_particles_get() const {
 }
 
 std::tuple<std::vector<GLfloat>, std::vector<GLfloat>>
-Motor::update(GLint program, int wind) {
+Motor::update(int wind) {
     std::vector<GLfloat> list_position;
     std::vector<GLfloat> list_color;
     for (auto& p : list_particles_) {
-        auto pos = p.update(program, wind);
+        /* Update */
+        auto pos = p.update(wind);
+
+        /* Get the position */
         list_position.push_back(pos.x_get());
         list_position.push_back(pos.y_get());
         list_position.push_back(pos.z_get());
 
-
+        /* Get the color */
         auto c = p.color_get();
         list_color.push_back(c.red / 255);
         list_color.push_back(c.green / 255);
@@ -59,6 +62,7 @@ Motor::update(GLint program, int wind) {
 
 void
 Motor::kill(int nb) {
-    for (int i = 0; i < 300; ++i)
+    /* Kill nb particles */
+    for (int i = 0; i < nb; ++i)
         list_particles_.erase(list_particles_.begin());
 }
